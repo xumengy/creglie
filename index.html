@@ -121,7 +121,7 @@
             background-image: url('images/data-connect.jpg');
             background-size: cover;
             background-repeat: no-repeat;
-            opacity: 0.15; /* 调整透明度 */
+            opacity: 0.4; /* 调整透明度 */
         }
         .card-2::before {
             content: '';
@@ -133,7 +133,7 @@
             background-image: url('images/report-preview.jpg');
             background-size: cover;
             background-repeat: no-repeat;
-            opacity: 0.15; /* 调整透明度 */
+            opacity: 0.4; /* 调整透明度 */
         }
         /* 用户评价 */
         .reviews {
@@ -342,7 +342,7 @@
                     <input type="text" id="stock-input" placeholder="输入股票代码（例：AAPL）">
                     <button id="analyze-btn" onclick="analyzeStock()">立即诊断</button>
                 </div>
-                <p style="color: #8899aa;">支持A股/港股/美股市场</p>
+                <p style="color: #8899aa;">支持全球股票市场</p>
             </div>
             <div id="diagnosisPopup" class="popup">
                 <div class="modal-box"></div>
@@ -414,15 +414,14 @@
         <!-- 信任标识 -->
         <div class="trust-badges">
             <div style="backdrop-filter: blur(5px); padding:20px; border-radius:10px;">
-                <p class="neon-text">✔ 256位加密传输</p>
-                <p class="neon-text">✔ 每日数据更新</p>
+                <p class="neon-text">✔ 256位军事级加密传输</p>
+                <p class="neon-text">✔ 为数据安全护航</p>
             </div>
         </div>
 
         <!-- 合规声明 -->
         <div class="disclaimer">
             <p>风险提示：本工具基于机器学习算法和历史数据生成分析结果，不构成投资建议</p>
-            <p style="margin-top: 15px;">数据来源：中国证监会、Wind、IMF公开信息</p>
         </div>
     </div>
     <script src="static/js/jquery-3.6.0.min.js"></script>
@@ -458,7 +457,7 @@
             // 简单输入验证
             function analyzeStock() {
                 const stockCode = document.getElementById('stock-input').value.trim();
-                if (!stockCode) {
+                if (!/^[A-Z0-9]{1,6}$/.test(stockCode)) {
                     alert('请输入有效股票代码');
                     return;
                 }
@@ -531,7 +530,7 @@
                 container.appendChild(clone);
                 
                 let scrollPos = 0;
-                const speed = 1; // 调整滚动速度
+                const speed = 0.5; // 调整滚动速度
                 
                 function scroll() {
                     scrollPos += speed;
