@@ -457,7 +457,7 @@
             // 简单输入验证
             function analyzeStock() {
                 const stockCode = document.getElementById('stock-input').value.trim();
-                if (!/^[A-Z0-9]{1,6}$/.test(stockCode)) {
+                if (!stockCode) {
                     alert('请输入有效股票代码');
                     return;
                 }
