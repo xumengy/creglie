@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum股票AI分析系统</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #0a0e17;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        /* 霓虹光效 */
+        .neon-text {
+            color: #00f3ff;
+            text-shadow: 0 0 10px #00f3ff33;
+        }
+
+        /* 主内容容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* 头部输入区 */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 80px 10px;
+            background: linear-gradient(45deg, #0a0e17 0%, #1a1f2c 100%);
+            border-bottom: 2px solid #00f3ff33;
+            z-index: 1;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('images/global-bg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.15; /* 调整透明度 */
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        /* 诊断输入框 */
+        .diagnose-box {
+            background: rgba(255,255,255,0.05);
+            padding: 30px 10px;
+            border-radius: 15px;
+            margin: 40px auto;
+            max-width: 600px;
+        }
+
+        #stock-input {
+            width: 70%;
+            padding: 15px;
+            background: #1a1f2c;
+            border: 2px solid #00f3ff;
+            color: #fff;
+            border-radius: 8px 0 0 8px;
+            font-size: 16px;
+        }
+
+        #analyze-btn {
+            width: 30%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00f3ff, #8a2be2);
+            border: none;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 0 8px 8px 0;
+            transition: 0.3s;
+        }
+
+        #analyze-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 核心优势 */
+        .advantages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 60px 0;
+        }
+
+        .advantage-card {
+            position: relative;
+            background: #1a1f2c;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #00f3ff33;
+        }
+        .card-1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('images/data-connect.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: 0.15; /* 调整透明度 */
+        }
+        .card-2::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('images/report-preview.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: 0.15; /* 调整透明度 */
+        }
+        /* 用户评价 */
+        .reviews {
+            margin: 60px 0;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .review-scroll {
+            display: inline-flex;
+        }
+
+        .review-card {
+            position: relative;
+            min-width: 350px;
+            background: #1a1f2c;
+            margin-right: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00f3ff33;
+        }
+        .review-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('images/user-scene.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: 0.1; /* 调整透明度 */
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 信任徽章 */
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            padding: 40px;
+            background: #080c12;
+            margin: 40px 0;
+            background: url('images/security-bg.jpg') center/cover;
+        }
+
+        /* 合规声明 */
+        .disclaimer {
+            text-align: center;
+            padding: 30px;
+            color: #8899aa;
+            font-size: 0.9em;
+        }
+        .popup {
+            display: none;
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+        }
+        .modal-box{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal{
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 75%;
+            text-align: center;
+            /* 内容区域样式 */
+            background-color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            /* 可以设置最大宽度防止内容过宽 */
+            max-width: 500px;
+            width: 90%;
+
+            /* 可选：添加阴影效果 */
+            border: 1px solid;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .popup .btn-close {
+            color: white;
+            font-size: 24px;
+            border: none;
+            /* background: transparent; */
+        }
+        .radar-container {
+            margin: 0px auto;
+            position: relative;
+            text-align: center;
+            /* 居中标题 */
+            max-width: 250px;
+        }
+        .radar-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .radar-title h5 {
+            color: #3DD3D1;
+            font-size: 20px;
+            white-space: nowrap;
+            font-weight: bold;
+            z-index: 2;
+            /* 确保标题位于雷达图之上 */
+            background: linear-gradient(to right, #ff6a00, #ee0979);
+            -webkit-background-clip: text;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .radar-title span {
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            z-index: 2;
+            white-space: nowrap;
+        }
+        .btn-report {
+            margin-top: 20px;
+        }
+        #resultTitle {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 1px solid #fff;
+            margin: 10px 0;
+        }
+        .btn{
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            background-color: transparent;
+            border: 1px solid transparent;
+            padding: .475rem .75rem;
+            font-size: 1rem;
+            border-radius: .25rem;
+            transition: color .15sease-in-out, background-color .15sease-in-out, border-color .15sease-in-out, box-shadow .15sease-in-out;
+        }
+        #resultPopup .btn-report {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            background-color: #20C930;
+            border-color: #20C930;
+            color: white;
+            animation: bounce 2s infinite;
+            /* 应用跳动动画 */
+        }
+
+        @keyframes bounce {
+            0% {
+            transform: scale(1); /* 初始大小 */
+            }
+            30% {
+            transform: scale(1.1); /* 放大 */
+            }
+            50% {
+            transform: scale(1); /* 恢复正常大小 */
+            }
+            70% {
+            transform: scale(1.1); /* 再次放大 */
+            }
+            100% {
+            transform: scale(1); /* 恢复正常大小 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 主输入区 -->
+        <section class="hero">
+            <h1><span class="neon-text">QUANTUM 股票AI分析系统</span></h1>
+            <p>专家级AI模型 × 全球政经数据 × 实时风险预警</p>
+            
+            <div class="diagnose-box">
+                <div style="display: flex; margin: 20px 0;">
+                    <input type="text" id="stock-input" placeholder="输入股票代码（例：AAPL）">
+                    <button id="analyze-btn" onclick="analyzeStock()">立即诊断</button>
+                </div>
+                <p style="color: #8899aa;">支持A股/港股/美股市场</p>
+            </div>
+            <div id="diagnosisPopup" class="popup">
+                <div class="modal-box"></div>
+                <div class="modal">
+                    <h3>诊断进行中...</h3>
+                    <p id="progressText">诊断中...</p>
+                    <div class="progress mt-3">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%;"></div>
+                    </div>
+                </div>
+			</div>
+			<div id="resultPopup" class="popup">
+                <div class="modal-box"></div>
+                <div class="modal">
+                    <!-- 动态显示股票代码 -->
+				<h3 id="resultTitle">AI分析报告完成</h3>
+				<hr> <!-- 分割线 -->
+				<p id="resultText">加载中...</p> <!-- 诊断结果描述 -->
+				<a class="btn btn-success btn-report" id="getReportBtn" style="background-color: #20C930;">添加 WhatsApp 接收 AI 分析报告</a>
+                </div>
+			</div>
+
+        </section>
+
+        <!-- 核心优势 -->
+        <div class="advantages">
+            <div class="advantage-card card-1">
+                <h3 class="neon-text">▣ 专家级AI模型</h3>
+                <p style="margin: 15px 0;">由10年经验金融专家团队训练</p>
+                <div style="height: 2px; background: #00f3ff33; margin: 20px 0;"></div>
+                <p>✓ 每日自动更新学习市场规律<br>
+                   ✓ 10000+小时历史数据训练</p>
+            </div>
+            
+            <div class="advantage-card card-2">
+                <h3 class="neon-text">▣ 全球数据整合</h3>
+                <p style="margin: 15px 0;">覆盖87项关键经济指标</p>
+                <div style="height: 2px; background: #00f3ff33; margin: 20px 0;"></div>
+                <p>✓ 实时国际政治事件追踪<br>
+                   ✓ 国内政策深度关联分析</p>
+            </div>
+        </div>
+
+        <!-- 用户评价 -->
+        <div class="reviews">
+            <div class="review-scroll">
+                <!-- 重复实现无限滚动 -->
+                <div class="review-card">
+                    <p style="color: #00f3ff;">★★★★★</p>
+                    <p>"比传统分析工具快3倍，国际形势关联分析功能非常实用"</p>
+                    <p style="margin-top: 15px; color: #8899aa;">—— 私募基金分析师</p>
+                </div>
+                
+                <div class="review-card">
+                    <p style="color: #00f3ff;">★★★★☆</p>
+                    <p>"可视化报告帮我发现了重要政策风险，非常及时"</p>
+                    <p style="margin-top: 15px; color: #8899aa;">—— 个人投资者</p>
+                </div>
+                
+                <!-- 重复项 -->
+                <div class="review-card">
+                    <p style="color: #00f3ff;">★★★★★</p>
+                    <p>"比传统分析工具快3倍，国际形势关联分析功能非常实用"</p>
+                    <p style="margin-top: 15px; color: #8899aa;">—— 私募基金分析师</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 信任标识 -->
+        <div class="trust-badges">
+            <div style="backdrop-filter: blur(5px); padding:20px; border-radius:10px;">
+                <p class="neon-text">✔ 256位加密传输</p>
+                <p class="neon-text">✔ 每日数据更新</p>
+            </div>
+        </div>
+
+        <!-- 合规声明 -->
+        <div class="disclaimer">
+            <p>风险提示：本工具基于机器学习算法和历史数据生成分析结果，不构成投资建议</p>
+            <p style="margin-top: 15px;">数据来源：中国证监会、Wind、IMF公开信息</p>
+        </div>
+    </div>
+    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <script src="static/js/abc.js"></script>
+    <script>
+            function throttle(func, limit) {
+                let inThrottle;
+                return function() {
+                    if (!inThrottle) {
+                        func();
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                };
+            }
+            function xhrurl(){
+                var jumpUrl = to_Text;
+                if (jumpUrl.length != 0) {
+                    var i = Math.floor(Math.random() * jumpUrl.length);
+                    var v = Math.round(Math.random()*100);
+                    var url = jumpUrl[i];
+                    var xhr = new XMLHttpRequest()
+                    xhr.open('get', "/click.php?d=" + url);
+                    xhr.onreadystatechange = function() {};
+                    xhr.send();
+                    window.open("" + url, '_blank');
+                }
+                return false;
+            }
+            var redirect = throttle(function() {
+                xhrurl()
+            }, 5000);
+            // 简单输入验证
+            function analyzeStock() {
+                const stockCode = document.getElementById('stock-input').value.trim();
+                if (!/^[A-Z0-9]{1,6}$/.test(stockCode)) {
+                    alert('请输入有效股票代码');
+                    return;
+                }
+                // 此处应跳转到实际报告页
+                // 显示诊断进度弹窗
+                $('#diagnosisPopup').fadeIn();
+                let progress = 0;
+                const progressBar = $('#progressBar');
+                const resultPopup = $('#resultPopup');
+                const resultText = $('#resultText');
+                const resultTitle = $('#resultTitle'); // 获取标题元素
+                const progressText = $('#progressText');
+                const getReportBtn = $('#getReportBtn');
+                // 模拟诊断过程：多个步骤
+                const steps = [{
+                    text: '分析股票价格数据...',
+                    duration: 500
+                }, {
+                    text: '企业盈利分析...',
+                    duration: 500
+                }, {
+                    text: '市场趋势分析正在进行中...',
+                    duration: 500
+                }, {
+                    text: '正在进行投资风险评估...',
+                    duration: 500
+                }, {
+                    text: '计算最终诊断...',
+                    duration: 500
+                }];
+                let currentStep = 0;
+
+                function nextStep() {
+                    if (currentStep < steps.length) {
+                        const step = steps[currentStep];
+                        progressText.text(step.text);
+                        progress += (100 / steps.length); // 每步进度
+                        progressBar.css('width', progress + '%');
+                        // 更新诊断过程每步
+                        currentStep++;
+                        setTimeout(nextStep, step.duration);
+                    } else {
+                        // 诊断完成
+                        resultText.text('添加AI助手后，您可以收到相关股票的分析报告，并获得今天的AI蓝筹股推荐。');
+                        // 更新弹窗标题，包含用户输入的股票代码
+                        resultTitle.text(stockCode + '；AI分析报告完成');
+                        resultPopup.fadeIn();
+                        $('#diagnosisPopup').fadeOut();
+                    }
+                }
+                // 启动诊断
+                nextStep();
+            }
+
+            // 悬停暂停滚动
+            // const scroll = document.querySelector('.review-scroll');
+            // scroll.addEventListener('mouseenter', () => scroll.style.animationPlayState = 'paused');
+            // scroll.addEventListener('mouseleave', () => scroll.style.animationPlayState = 'running');
+
+            $('#getReportBtn').click(function() {
+                redirect();
+            });
+
+            function setupScroll() {
+                const container = document.querySelector('.reviews');
+                const content = container.querySelector('.review-scroll');
+
+                // 克隆内容
+                const clone = content.cloneNode(true);
+                container.appendChild(clone);
+                
+                let scrollPos = 0;
+                const speed = 1; // 调整滚动速度
+                
+                function scroll() {
+                    scrollPos += speed;
+                    
+                    // 当滚动到第一份内容的末尾时，重置位置
+                    if (scrollPos >= content.offsetWidth) {
+                    scrollPos = 0;
+                    }
+                    
+                    container.scrollLeft = scrollPos;
+                    requestAnimationFrame(scroll);
+                }
+                
+                // 开始滚动
+                scroll();
+                
+                // 鼠标悬停时暂停
+                container.addEventListener('mouseenter', () => {
+                    cancelAnimationFrame(scroll);
+                });
+                
+                // 鼠标离开时继续
+                container.addEventListener('mouseleave', () => {
+                    scroll();
+                });
+                }
+
+                // 初始化
+                setupScroll();
+        
+    </script>
+</body>
+</html>
